@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AquaSense — Sentinel Water Intelligence</title>
+
+  <!-- Mapbox -->
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet" />
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <!-- Flatpickr date picker -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Noise Overlay -->
+  <div class="noise-overlay"></div>
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar" id="sidebar">
+
+    <!-- Brand -->
+    <div class="brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4 20 Q8 14 12 20 Q16 26 20 20 Q24 14 28 20" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+          <circle cx="16" cy="12" r="5" stroke="var(--accent)" stroke-width="2" fill="none"/>
+          <path d="M16 7 L16 3M16 17 L16 21M21 12 L25 12M7 12 L11 12" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-name">AquaSense</div>
+        <div class="brand-sub">Sentinel Water Intelligence</div>
+      </div>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- Study Area Selection -->
+    <div class="control-section area-panel">
+      <div class="section-label">STUDY AREA</div>
+      <div class="area-mode-grid" id="areaModeGrid">
+        <button class="mode-btn active" data-mode="rectangle">Rectangle</button>
+        <button class="mode-btn" data-mode="circle">Circle</button>
+        <button class="mode-btn" data-mode="polygon">Polygon</button>
+        <button class="mode-btn" data-mode="freeform">Freeform</button>
+      </div>
+      <div class="area-tools">
+        <button class="aux-btn" id="startAreaBtn">Start</button>
+        <button class="aux-btn" id="finishAreaBtn" disabled>Finish</button>
+        <button class="aux-btn" id="clearAreaBtn">Clear</button>
+      </div>
+      <div class="area-hint" id="areaHint">No area selected. Choose a mode and click Start.</div>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- Controls -->
+    <div class="control-section">
+      <div class="section-label">MISSION PARAMETERS</div>
+
+      <div class="control-group">
+        <label class="ctrl-label">Start Date</label>
+        <div class="date-wrapper">
+          <svg class="date-icon" viewBox="0 0 20 20" fill="none"><rect x="2" y="4" width="16" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M2 8H18M7 2V4M13 2V4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <input type="text" id="startDate" class="date-input" placeholder="YYYY-MM-DD" readonly />
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="ctrl-label">End Date</label>
+        <div class="date-wrapper">
+          <svg class="date-icon" viewBox="0 0 20 20" fill="none"><rect x="2" y="4" width="16" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M2 8H18M7 2V4M13 2V4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <input type="text" id="endDate" class="date-input" placeholder="YYYY-MM-DD" readonly />
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="ctrl-label">Polarization Band</label>
+        <div class="select-wrapper">
+          <select id="polarization" class="ctrl-select">
+            <option value="VV">VV — Vertical-Vertical</option>
+            <option value="VH">VH — Vertical-Horizontal</option>
+          </select>
+          <svg class="select-arrow" viewBox="0 0 12 12" fill="none"><path d="M2 4L6 8L10 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="ctrl-label">Water Threshold (dB)</label>
+        <div class="slider-row">
+          <input type="range" id="threshold" class="ctrl-slider" min="-25" max="-10" step="0.5" value="-16" />
+          <span class="slider-val" id="thresholdVal">−16 dB</span>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="ctrl-label">Map Opacity</label>
+        <div class="slider-row">
+          <input type="range" id="opacity" class="ctrl-slider" min="0" max="100" step="1" value="85" />
+          <span class="slider-val" id="opacityVal">85%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- Quick Presets -->
+    <div class="control-section">
+      <div class="section-label">QUICK PRESETS</div>
+      <div class="preset-grid">
+        <button class="preset-btn" data-days="7">7D</button>
+        <button class="preset-btn" data-days="30">30D</button>
+        <button class="preset-btn" data-days="90">90D</button>
+        <button class="preset-btn" data-days="180">6M</button>
+      </div>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- Fetch Button -->
+    <button class="fetch-btn" id="fetchBtn">
+      <span class="fetch-btn-text">
+        <svg viewBox="0 0 20 20" fill="none" class="fetch-icon"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5"/><path d="M10 6V10L13 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Analyze Water Bodies
+      </span>
+      <div class="fetch-btn-glow"></div>
+    </button>
+
+    <button class="download-btn" id="downloadBtn">
+      <span class="fetch-btn-text">
+        <svg viewBox="0 0 20 20" fill="none" class="fetch-icon"><path d="M10 3V12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M6.5 9.5L10 13L13.5 9.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 16H16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        Download Water Bodies (Shapefile)
+      </span>
+    </button>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- Stats Panel -->
+    <div class="stats-section" id="statsPanel">
+      <div class="section-label">ANALYSIS RESULTS</div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="statImages">—</div>
+          <div class="stat-label">Images</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statArea">—</div>
+          <div class="stat-label">Water Area</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statMin">—</div>
+          <div class="stat-label">Min (dB)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statMax">—</div>
+          <div class="stat-label">Max (dB)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="sidebar-footer">
+      <div class="footer-line">Copernicus Sentinel-1 GRD</div>
+      <div class="footer-line">Google Earth Engine · Mapbox GL</div>
+    </div>
+  </aside>
+
+  <!-- ── MAIN MAP AREA ── -->
+  <main class="main-area">
+
+    <!-- Top Bar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="sidebar-toggle" id="sidebarToggle" title="Toggle Sidebar">
+          <span></span><span></span><span></span>
+        </button>
+        <div class="status-pill" id="statusPill">
+          <span class="status-dot"></span>
+          <span class="status-text" id="statusText">Ready</span>
+        </div>
+      </div>
+      <div class="topbar-center">
+        <div class="coords-display" id="coordsDisplay">Hover map for coordinates</div>
+      </div>
+      <div class="topbar-right">
+        <button class="icon-btn" id="fullscreenBtn" title="Toggle Fullscreen">
+          <svg viewBox="0 0 20 20" fill="none"><path d="M3 7V3H7M13 3H17V7M17 13V17H13M7 17H3V13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+        <button class="icon-btn" id="resetViewBtn" title="Reset View">
+          <svg viewBox="0 0 20 20" fill="none"><path d="M10 3C6.13 3 3 6.13 3 10s3.13 7 7 7 7-3.13 7-7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M17 3L14 6M17 3L14 0M17 3H14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Map -->
+    <div id="map"></div>
+
+    <!-- Loading Overlay -->
+    <div class="map-loading" id="mapLoading">
+      <div class="loading-inner">
+        <div class="pulse-rings">
+          <div class="ring r1"></div>
+          <div class="ring r2"></div>
+          <div class="ring r3"></div>
+          <div class="ring-core"></div>
+        </div>
+        <div class="loading-label">Processing Sentinel-1 Data</div>
+        <div class="loading-sub" id="loadingSub">Initializing Earth Engine…</div>
+        <div class="loading-progress"><div class="progress-bar" id="progressBar"></div></div>
+      </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="legend" id="legend">
+      <div class="legend-title">SAR Backscatter</div>
+      <div class="legend-bar">
+        <div class="legend-gradient"></div>
+        <div class="legend-ticks">
+          <span>−25 dB</span>
+          <span>Water</span>
+          <span>Land</span>
+          <span>0 dB</span>
+        </div>
+      </div>
+      <div class="legend-items">
+        <div class="legend-item"><div class="legend-swatch water"></div><span>Water Body</span></div>
+        <div class="legend-item"><div class="legend-swatch land"></div><span>Land Surface</span></div>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast-container" id="toastContainer"></div>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
