@@ -754,7 +754,12 @@ body { display: flex; }
 .legend-gradient {
   height: 10px;
   border-radius: 5px;
-  background: linear-gradient(90deg, #0a1628 0%, #1a3a6e 30%, #1a8cff 60%, #66ccff 80%, #e8f4ff 100%);
+  background: linear-gradient(
+    90deg,
+    rgba(78, 179, 255, 0.08) 0%,
+    rgba(78, 179, 255, 0.18) 45%,
+    rgba(26, 140, 255, 0.9) 100%
+  );
   margin-bottom: 6px;
   border: 1px solid var(--border);
 }

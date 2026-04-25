@@ -222,19 +222,16 @@
 
     <!-- Legend -->
     <div class="legend" id="legend">
-      <div class="legend-title">SAR Backscatter</div>
+      <div class="legend-title" id="legendTitle">Water Detection Mask (<= -16 dB)</div>
       <div class="legend-bar">
         <div class="legend-gradient"></div>
         <div class="legend-ticks">
-          <span>−25 dB</span>
-          <span>Water</span>
-          <span>Land</span>
-          <span>0 dB</span>
+          <span>Less likely</span>
+          <span>Detected water</span>
         </div>
       </div>
       <div class="legend-items">
-        <div class="legend-item"><div class="legend-swatch water"></div><span>Water Body</span></div>
-        <div class="legend-item"><div class="legend-swatch land"></div><span>Land Surface</span></div>
+        <div class="legend-item"><div class="legend-swatch water"></div><span>Pixels below threshold</span></div>
       </div>
     </div>
 

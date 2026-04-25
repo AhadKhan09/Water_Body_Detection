@@ -253,28 +253,19 @@ def fetch_sentinel(
         if aoi is not None:
             composite = composite.clip(aoi)
 
-        # 3. Apply refined Lee speckle filter (3×3 focal mean as proxy)
-        smoothed = composite.focal_mean(radius=1, kernelType="square", units="pixels")
+        # 3. Apply light speckle suppression while preserving boundaries
+        smoothed = composite.focal_median(radius=1, kernelType="square", units="pixels")
 
         # 4. Create water mask (low backscatter = water)
         water_mask = smoothed.lt(threshold)
 
-        # 5. Visualisation — composite coloured for water/land distinction
-        #    Water = deep blue ramp, land = green-grey
-        vis_image = smoothed.visualize(
-            min=-25,
-            max=0,
-            palette=[
-                "020d1f",   # very dark (deepest water)
-                "0a2a5e",   # dark navy
-                "1a5fa8",   # mid blue (water)
-                "4eb3ff",   # bright cyan-blue
-                "a8d5ff",   # light blue (shallow/wet)
-                "c8c8a0",   # grey-green (transition)
-                "7a9a5a",   # land green
-                "e8d08a",   # dry land
-                "f0ead8",   # very dry / bare soil
-            ],
+        # 5. Visualisation — show thresholded water mask directly.
+        #    Non-water pixels are transparent so threshold updates are visible.
+        vis_image = water_mask.selfMask().visualize(
+            min=0,
+            max=1,
+            palette=["1a8cff"],
+            opacity=0.92,
         )
 
         # 6. Generate tile URL via getMapId
@@ -405,7 +396,7 @@ def download_sentinel_shapefile(
             )
 
         composite = collection.mean().clip(aoi)
-        smoothed = composite.focal_mean(radius=1, kernelType="square", units="pixels")
+        smoothed = composite.focal_median(radius=1, kernelType="square", units="pixels")
         water_mask = smoothed.lt(threshold).selfMask()
 
         vectors = water_mask.reduceToVectors(

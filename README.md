@@ -76,8 +76,8 @@ Then open `http://localhost:3000` in your browser.
    - Applies a focal mean smoothing filter
   - Clips imagery to the selected AOI
    - Generates a colour-mapped tile URL via GEE
-5. The tile is overlaid on the Mapbox dark basemap
-6. Water bodies appear as **deep blue** areas; land is grey-green
+5. The thresholded water-mask tile is overlaid on the Mapbox dark basemap
+6. Pixels below threshold appear as **deep blue** water detections; non-water pixels stay transparent
 7. Use **Download Water Bodies (Shapefile)** to export detected polygons for GIS workflows
 
 ---
